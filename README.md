@@ -89,8 +89,8 @@ wine64 reg add "HKLM\System\CurrentControlSet\Services\winebus" /v "Enable SDL" 
 
 Wine `dlopen()`s `libSDL2-2.0.0.dylib` and `dlsym()`s 52 symbols from it. The shim *is* that library:
 
-- **35 non-haptic symbols** are one-instruction assembly trampolines into the real SDL2 (renamed alongside). A naked `jmp` preserves every argument register, so one macro covers every signature without declaring 35 prototypes.
-- **17 haptic symbols** are reimplemented against the wheel.
+- **33 symbols** are one-instruction assembly trampolines into the real SDL2 (renamed alongside). A naked `jmp` preserves every argument register, so one macro covers every signature without declaring 33 prototypes.
+- **19 symbols** are reimplemented in C: the 17 haptic entry points, plus `SDL_JoystickIsHaptic` and `SDL_JoystickGetType` — the two gates that decide whether Wine builds a force-feedback device at all, and which axis usages it uses.
 
 ```
 game → dinput8 → winebus PID device → SDL_Haptic → shim → lg4ff HID reports → motor

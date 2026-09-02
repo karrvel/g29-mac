@@ -18,7 +18,7 @@ provenance: 2026-09-01 session — built and verified end to end against Live fo
 
 **Why.** The blocker is a single boolean: Wine synthesises a DirectInput PID device if and only if SDL says the joystick is haptic. Wine loads SDL by `dlopen` + `dlsym` on 52 symbols, so the library is a clean, well-defined seam that requires patching neither Wine nor the games. Cost is zero and nothing is added to the paid-software stack. The requirement was explicitly free, and a paid host runner would have been needed on top of the paid bridge.
 
-**How it is built.** 35 non-haptic symbols become one-instruction assembly trampolines (`jmp` through a resolved pointer) into the renamed real SDL2 — a naked jump preserves every argument register, so one macro covers every signature without declaring 35 prototypes. The 17 haptic entry points are reimplemented against the wheel. Must be compiled `-arch x86_64`, because Whisky's `winebus.so` is x86_64 under Rosetta.
+**How it is built.** 33 symbols become one-instruction assembly trampolines (`jmp` through a resolved pointer) into the renamed real SDL2 — a naked jump preserves every argument register, so one macro covers every signature without declaring 33 prototypes. The other 19 are reimplemented in C: the 17 haptic entry points plus `SDL_JoystickIsHaptic` and `SDL_JoystickGetType`. Must be compiled `-arch x86_64`, because Whisky's `winebus.so` is x86_64 under Rosetta.
 
 **Consequences.**
 

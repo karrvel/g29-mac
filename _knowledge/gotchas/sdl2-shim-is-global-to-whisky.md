@@ -18,7 +18,7 @@ In practice the blast radius is nil, because the shim gates hard on the device: 
 
 Two things to keep in mind:
 
-- **The trampolines are the risk surface, not the haptic overrides.** 35 of the 52 exported symbols are one-instruction assembly jumps into the renamed real library, and the macro's fallback path returns 0 rather than crashing if a pointer failed to resolve. A silent zero would look like "wheel detected but no axes", not like a crash. Confirmed working: dinput traces show real data coming back through those trampolines (`vid 046d, pid c24f, version 8900`, full product name) — zeros would have been unmistakable.
+- **The trampolines are the risk surface, not the haptic overrides.** 33 of the 52 exported symbols are one-instruction assembly jumps into the renamed real library, and the macro's fallback path returns 0 rather than crashing if a pointer failed to resolve. A silent zero would look like "wheel detected but no axes", not like a crash. Confirmed working: dinput traces show real data coming back through those trampolines (`vid 046d, pid c24f, version 8900`, full product name) — zeros would have been unmistakable.
 - **Reverting is one command and always safe:** `scripts/install-shim.sh revert` restores the original library byte-for-byte. The original is kept alongside as `libSDL2-2.0.0.real.dylib` with its install name rewritten — that rename matters, because dyld deduplicates by install name and would otherwise resolve the shim's own `dlopen` back to the shim and recurse.
 
 If per-bottle scoping is ever needed, the fix is to give the bottle its own copy of Wine's `lib` dir, or set `DYLD_LIBRARY_PATH` in the launcher scripts instead of replacing the shared dylib. See [[shim-scoping-and-periodic-effects]].
