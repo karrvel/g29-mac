@@ -1,37 +1,15 @@
-# g29-mac — build artefacts + the KB kit's embedded-model exclusions.
-
-# compiled binaries (rebuild with ./build.sh)
-ffb-probe
-lgwheel
-libSDL2-2.0.0.dylib
+# Build output
+bin/
+contrib/sdl3-probe/g29probe
+contrib/sdl3-probe/ffcheck
 *.o
 *.dSYM/
-sdl3-probe/g29probe
-sdl3-probe/ffcheck
 
-# Embedded-model additions — add these lines to your project's existing .gitignore.
-# (This file starts with a blank line on purpose, so `cat embedded.gitignore >>
-# .gitignore` can never fuse onto an existing last rule that lacks a newline.)
-# The vault (_knowledge/) is tracked by your project's git like any other directory.
-# Only the carryover scripts and local tooling files are excluded.
-#
-# Layout this creates:
-#   ~/Projects/my-project/
-#   ├── _knowledge/    ← tracked alongside your source code
-#   ├── _meta/         ← untracked (kit scripts — disposable copy)
-#   ├── src/           ← your code (tracked as normal)
-#   ├── .cursor/rules/ ← tracked (kb-sync output)
-#   └── CLAUDE.md      ← tracked
-
-# carryover tooling — disposable local copy, never publish
+# carryover KB tooling — disposable local copy, never publish
 _meta/
 
 # PII denylist — machine-specific, never commit
 .pii-denylist.local
-
-# Cursor MCP server config — can hold API tokens, never commit
-# (.cursor/rules/ stays tracked — it's kb-sync output)
-.cursor/mcp.json
 
 # Digest output from prefilter.py — large, never commit
 _kb-digests/

@@ -6,6 +6,8 @@
 #   WINEPREFIX        an explicit bottle path    (skips the search entirely)
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT="$(cd "$HERE/.." && pwd)"
+BIN="$ROOT/bin"
 WHISKY_SUPPORT="$HOME/Library/Application Support/com.isaacmarovitz.Whisky"
 BOTTLES_DIR="$HOME/Library/Containers/com.isaacmarovitz.Whisky/Bottles"
 WINE="$WHISKY_SUPPORT/Libraries/Wine/bin/wine64"
@@ -44,9 +46,10 @@ export WINEPREFIX
 }
 
 # Logitech wheels power up at a reduced rotation range until told otherwise.
+# Built tools live in bin/ (see the Makefile); scripts live in scripts/.
 prep_wheel() {
-    if [ -x "$HERE/lgwheel" ]; then
-        "$HERE/lgwheel" --range 900 >/dev/null 2>&1 && echo "wheel: 900 degrees set" \
+    if [ -x "$BIN/lgwheel" ]; then
+        "$BIN/lgwheel" --range 900 >/dev/null 2>&1 && echo "wheel: 900 degrees set" \
             || echo "wheel: not detected (connect the G29 and its power brick)"
     fi
 }

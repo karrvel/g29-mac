@@ -31,6 +31,6 @@ The G29 exposes exactly **four** axes, and their resting values are the explanat
 
 **The fix is calibration, not configuration files.** In LFS use **Options → Controls**, click each axis field and press that pedal; LFS binds whatever moves and calibrates its range, which handles the inversion as a side effect. Do **not** hand-edit `data/misc/Logitech_G29_Driving_Force_Racing_Wheel.csf` — it is an opaque binary (`LFSCON` magic) and editing it is guesswork. Back it up before re-binding.
 
-To see the mapping for yourself on any game: `./identify-pedals.sh`, then press one pedal at a time. It prints which axis moved, its range, and whether it rests high or low.
+To see the mapping for yourself on any game: `scripts/identify-pedals.sh`, then press one pedal at a time. It prints which axis moved, its range, and whether it rests high or low.
 
 **The other half of the LFS trap:** pedals are **axes**, not buttons, and LFS's control screen separates the two. Assigning them on the `Buttons 1` tab — where the prompt reads "Press button for : Accelerate" — can never work, because LFS is waiting for a button press and a pedal is not one. Axes live on the **`Axes / FF`** tab. Also set `Throttle / brake axes: separate` (not `combined`) for a three-pedal set, and `Clutch: axis` rather than `button`.

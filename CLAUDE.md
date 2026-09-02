@@ -14,20 +14,23 @@ Do not "fix" this by installing Logitech G HUB, a kext, or Apple's Game Porting 
 
 ```
 g29-mac/
-├── ffb-probe.c            diagnostic — proves Apple's FF stack refuses the wheel
-├── lgwheel.c              the userspace driver (--detect --verify --range --autocentre --force)
-├── sdl2-lg4ff-shim.c      the bridge that gives Wine-hosted Windows sims real FFB (x86_64 only!)
-├── install-shim.sh        install / revert / status for the bridge — revert is always safe
-├── play-*.sh              game launchers (set the wheel to 900° first)
-├── _knowledge/            the vault — start at INDEX.md
-└── _meta/                 disposable copy of the KB tooling — never hand-edit, it's a copy
+├── Makefile             build entry point — `make`, `make install-shim`, `make check`, `make help`
+├── src/                 ffb-probe.c  lgwheel.c  sdl2-lg4ff-shim.c
+├── scripts/             launchers, installer, diagnostics (common.sh is sourced by all of them)
+├── bin/                 BUILD OUTPUT, gitignored — ./bin/lgwheel, ./bin/ffb-probe, ./bin/libSDL2-2.0.0.dylib
+├── docs/                task-oriented guides (how to use it)
+├── contrib/sdl3-probe/  independent SDL3 probe — second opinion when debugging
+├── _knowledge/          the vault (why we learned it) — start at INDEX.md
+└── _meta/               disposable copy of the KB tooling — never hand-edit, it's a copy
 ```
 
-The games live **outside** this folder, in the Whisky bottle named "Sim Racing". Its UUID is in `common.sh` — that file is the only link between this repo and the bottle.
+`docs/` and `_knowledge/` are deliberately different things: docs are *how do I do this*, the vault is *why is it like this*. Put new findings in the vault as shards and link to them from docs, rather than restating them.
+
+The games live **outside** this folder, in the Whisky bottle named "Sim Racing". `scripts/common.sh` finds it by name, so nothing here hardcodes a machine-specific path; override with `G29_BOTTLE_NAME` or `WINEPREFIX`.
 
 ## Gotchas that will cost you an hour each
 
-- Build the shim **`-arch x86_64`** — Whisky's `winebus.so` is x86_64 under Rosetta. `build.sh` gets this right; a hand-rolled `clang` silently produces an unloadable arm64 dylib.
+- Build the shim **`-arch x86_64`** — Whisky's `winebus.so` is x86_64 under Rosetta. The `Makefile` gets this right; a hand-rolled `clang` silently produces an unloadable arm64 dylib.
 - lg4ff commands are 7 bytes but must be **padded to the interface's 16-byte report** or the USB endpoint STALLs — [[lg4ff-reports-must-be-16-bytes]].
 - The FFB interface is the **joystick** one (usage page `0x01`, usage `0x04`), not the vendor-defined `0xff00` one.
 - **Leave the wheel's selector on PS4.** It reports `046d:c24f` and FFB works there — [[keep-g29-selector-on-ps4]].
@@ -49,7 +52,7 @@ _none open_
 ## Maintenance loop (after editing shards)
 
 ```bash
-./kb-sync.sh
+scripts/kb-sync.sh
 ```
 
 Use the wrapper, not `kb-sync.py` directly: it runs the whole loop *and* scrubs the absolute home path that kb-sync bakes into `INDEX.md`. This repo is public, so that path is a PII leak — the wrapper is what keeps it from coming back on every sync.

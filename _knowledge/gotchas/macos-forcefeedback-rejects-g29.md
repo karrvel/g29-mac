@@ -12,7 +12,7 @@ provenance: 2026-09-01 session — measured with ffb-probe.c on macOS 26.6.2, M4
 
 # The whole standard force-feedback stack is a dead end for this wheel, and it fails silently
 
-With the G29 physically attached and working, `FFIsForceFeedback()` returns `0x80000003` (unsupported) for **both** of its HID interfaces. Run `./ffb-probe` to reproduce: it reports 2 controller-class devices found, 0 force-feedback capable.
+With the G29 physically attached and working, `FFIsForceFeedback()` returns `0x80000003` (unsupported) for **both** of its HID interfaces. Run `./bin/ffb-probe` to reproduce: it reports 2 controller-class devices found, 0 force-feedback capable.
 
 The cause is not a missing driver you can install — it is a hardware class mismatch. `ForceFeedback.framework` only drives USB-HID **PID-class** (Physical Interface Device) hardware. The G29's report descriptor exposes usage pages `0x01` (Generic Desktop), `0x09` (Button) and `0xFF00` (vendor-defined) and **no `0x0F` PID page**. It speaks Logitech's proprietary FFB protocol instead — the one Linux implements in `hid-lg4ff`. Independently confirmed: nothing on a stock macOS install registers `kIOForceFeedbackLibTypeID`, so even a PID-class wheel would find no plug-in.
 

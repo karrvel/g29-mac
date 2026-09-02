@@ -30,4 +30,4 @@ cat <<'EOF'
 
 EOF
 sleep 3
-exec "$HERE/lgwheel" --axes "$SECS"
+exec "$(cd "$HERE/.." && pwd)/bin/lgwheel" --axes "$SECS"

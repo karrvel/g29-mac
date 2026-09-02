@@ -30,42 +30,53 @@ That last row is the entire opening.
 
 ## What's here
 
-| File | Purpose |
+```
+src/                  the three C programs
+scripts/              launchers, installer, diagnostics
+docs/                 guides — installation, troubleshooting, how it works, games
+contrib/sdl3-probe/   an independent SDL3-based probe, kept as a second opinion
+_knowledge/           the findings, as a small knowledge base
+bin/                  build output (gitignored)
+```
+
+| Component | Purpose |
 |---|---|
-| `ffb-probe.c` | Diagnostic. Enumerates HID devices and asks Apple's stack whether it can drive them. Proves the refusal above rather than asserting it. |
-| `lgwheel.c` | Userspace driver. `--detect`, `--range`, `--autocentre`, `--force`, `--test`, `--verify`, `--axes`. |
-| `sdl2-lg4ff-shim.c` | The bridge. A drop-in `libSDL2-2.0.0.dylib` reimplementing SDL's haptic API over the wheel protocol, so Wine builds a real FFB device for Windows games. |
-| `install-shim.sh` | `install` / `revert` / `status`. Always reversible. |
-| `identify-pedals.sh` | Press pedals, learn which HID axis each one is. |
-| `reset-bottle.sh` | Clears a wedged Wine bottle (`wineserver crashed`). |
-| `_knowledge/` | The findings, written up as a small knowledge base — start at [`_knowledge/INDEX.md`](_knowledge/INDEX.md). |
+| `src/ffb-probe.c` | Diagnostic. Enumerates HID devices and asks Apple's stack whether it can drive them. Proves the refusal below rather than asserting it. |
+| `src/lgwheel.c` | Userspace driver. `--detect`, `--range`, `--autocentre`, `--force`, `--test`, `--verify`, `--axes`. |
+| `src/sdl2-lg4ff-shim.c` | The bridge. A drop-in `libSDL2-2.0.0.dylib` reimplementing SDL's haptic API over the wheel protocol, so Wine builds a real FFB device for Windows games. |
+| `scripts/install-shim.sh` | `install` / `revert` / `status`. Always reversible. |
+| `scripts/identify-pedals.sh` | Press pedals, learn which HID axis each one is. |
+| `scripts/reset-bottle.sh` | Clears a wedged Wine bottle (`wineserver crashed`). |
 
-## Requirements
+## Documentation
 
-- Apple Silicon Mac, macOS 13+ (developed on macOS 26)
-- Xcode command line tools (`xcode-select --install`)
-- A Logitech wheel: G29, G920, G923, G27, G25, DFGT, Driving Force Pro, MOMO
-- For the Wine bridge only: [Whisky](https://github.com/Whisky-App/Whisky) with a bottle, and SDL2 headers (`brew install sdl2`)
+- [Installation and setup](docs/installation.md)
+- [Troubleshooting](docs/troubleshooting.md) — indexed by symptom
+- [How it works](docs/how-it-works.md)
+- [Running sims](docs/games.md)
+- [The knowledge base](_knowledge/INDEX.md) — every finding, with provenance
 
 ## Quick start
 
 ```bash
 git clone https://github.com/karrvel/g29-mac.git
 cd g29-mac
-./build.sh
+make                    # builds into bin/
 
-./lgwheel --detect     # is the wheel seen?
-./lgwheel --verify      # objective proof of torque — let go of the wheel first
+./bin/lgwheel --detect  # is the wheel seen?
+./bin/lgwheel --verify  # objective proof of torque — let go of the wheel first
 ```
+
+`make help` lists the rest.
 
 `--verify` applies a known force and watches the steering axis move on its own, so "does force feedback work?" is answered by measurement rather than by feel.
 
 ### Force feedback inside Wine games
 
 ```bash
-./install-shim.sh install     # back up the real SDL2, drop the shim in
-./install-shim.sh status
-./install-shim.sh revert      # undo, byte-for-byte, at any time
+make install-shim   # back up the real SDL2, drop the shim in
+make shim-status
+make revert-shim    # undo, byte-for-byte, at any time
 ```
 
 The bottle also needs Wine's SDL backend enabled:

@@ -15,11 +15,11 @@ WINE_LIB="$HOME/Library/Application Support/com.isaacmarovitz.Whisky/Libraries/W
 LIVE="$WINE_LIB/libSDL2-2.0.0.dylib"
 REAL="$WINE_LIB/libSDL2-2.0.0.real.dylib"
 BACKUP="$WINE_LIB/libSDL2-2.0.0.dylib.orig-backup"
-SHIM="$(cd "$(dirname "$0")" && pwd)/libSDL2-2.0.0.dylib"
+SHIM="$(cd "$(dirname "$0")/.." && pwd)/bin/libSDL2-2.0.0.dylib"
 
 case "${1:-status}" in
 install)
-    [ -f "$SHIM" ] || { echo "build the shim first: see build.sh"; exit 1; }
+    [ -f "$SHIM" ] || { echo "build the shim first:  make shim"; exit 1; }
 
     if [ ! -f "$REAL" ]; then
         echo "== backing up the original SDL2"

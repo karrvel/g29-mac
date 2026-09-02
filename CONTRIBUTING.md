@@ -7,9 +7,10 @@ Bug reports and patches are welcome, particularly from anyone with a Logitech wh
 Run the diagnostics and include their output:
 
 ```bash
-./lgwheel --detect      # is the wheel seen, and in which mode?
-./ffb-probe             # what does Apple's stack say about it?
-./lgwheel --verify      # does the motor respond? (let go of the wheel)
+make                    # build into bin/
+./bin/lgwheel --detect  # is the wheel seen, and in which mode?
+./bin/ffb-probe         # what does Apple's stack say about it?
+./bin/lgwheel --verify  # does the motor respond? (let go of the wheel)
 ```
 
 For a Wine problem, add `LG4FF_SHIM_DEBUG=1` and include the `[lg4ff-shim]` lines, plus the relevant `WINEDEBUG=+hid,+dinput` trace.
@@ -24,6 +25,7 @@ For a Wine problem, add `LG4FF_SHIM_DEBUG=1` and include the `[lg4ff-shim]` line
 
 ## Ground rules
 
-- Keep the tools dependency-free: system frameworks only, no package manager needed to run them.
+- Keep the tools dependency-free: system frameworks only, no package manager needed to run them. (Building the shim needs SDL2 headers; running it does not.)
+- Sources live in `src/`, shell in `scripts/`, build output in `bin/`. `make` is the only build entry point.
 - The shim must build `-arch x86_64` and must forward every non-wheel device untouched.
 - Anything asserted about hardware behaviour should be measured, not assumed. `--verify` exists for exactly this reason.

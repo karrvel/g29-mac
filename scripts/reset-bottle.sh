@@ -31,4 +31,4 @@ else
 fi
 
 # Forces can be left latched by a game that died mid-effect.
-[ -x "$HERE/lgwheel" ] && "$HERE/lgwheel" --stop >/dev/null 2>&1 && echo "wheel forces cleared."
+[ -x "$BIN/lgwheel" ] && "$BIN/lgwheel" --stop >/dev/null 2>&1 && echo "wheel forces cleared."

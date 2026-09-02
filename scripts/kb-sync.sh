@@ -6,7 +6,7 @@
 # wrapper regenerates and then replaces it with a placeholder. Use this instead
 # of calling kb-sync.py directly.
 set -euo pipefail
-cd "$(dirname "$0")"
+cd "$(cd "$(dirname "$0")/.." && pwd)"   # repo root
 [ -d _meta ] || { echo "_meta/ missing — see CLAUDE.md for how to restore it"; exit 1; }
 [ -f .githooks/kb.env ] && source .githooks/kb.env
 

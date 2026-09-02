@@ -33,6 +33,6 @@ The tight frame-time spread is the real win. A 3 ms range is smooth; the earlier
 
 **The quality settings that mattered**, edited in `drive_c/LFS/cfg.txt` with LFS closed (it rewrites the file on exit, so edits made while running are lost): `Antialiasing 0 0`, `Mirror AA 0 0`, `Shadow Cascades 2` (was 4), `Dynamic Reflect 2 1` (was 8 4), `Mirror External 0`. Backup at `cfg.txt.backup-preopt`.
 
-**Diagnostics worth reusing.** `LFS_HUD=1 ./play-lfs.sh` shows the overlay. If frame rate is low but CPU sits near idle (~12% here), the bottleneck is presentation or GPU, not translation — do not go chasing Rosetta. Note LFS.exe is a 32-bit PE and runs through Wine's `x86_32on64` path, which was *not* the limiter here.
+**Diagnostics worth reusing.** `LFS_HUD=1 scripts/play-lfs.sh` shows the overlay. If frame rate is low but CPU sits near idle (~12% here), the bottleneck is presentation or GPU, not translation — do not go chasing Rosetta. Note LFS.exe is a 32-bit PE and runs through Wine's `x86_32on64` path, which was *not* the limiter here.
 
 **Ceiling:** MoltenVK generally offers only FIFO presentation, so vsync cannot really be disabled — `dxgi.syncInterval = 0` in `dxvk.conf` is set but the display refresh still bounds things. Above ~100 fps is not the goal anyway; stable frame times are.

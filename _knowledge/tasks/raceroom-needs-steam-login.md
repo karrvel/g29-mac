@@ -22,9 +22,9 @@ A login in the macOS Steam app does not carry into the bottle — the Windows cl
 
 ```bash
 cd ~/Projects/g29-mac
-./install-raceroom.sh login      # sign in, approve Steam Guard on your phone
-./install-raceroom.sh install    # queues app 211500
-./install-raceroom.sh play
+scripts/install-raceroom.sh login      # sign in, approve Steam Guard on your phone
+scripts/install-raceroom.sh install    # queues app 211500
+scripts/install-raceroom.sh play
 ```
 
 **Acceptance.** `drive_c/Program Files (x86)/Steam/steamapps/common/raceroom racing experience` exists, the game launches, and a `LG4FF_SHIM_DEBUG=1` run logs `new effect … type 0x1` — the same constant-force signature Live for Speed and Speed Dreams produce, which is what proves FFB reached the wheel.
