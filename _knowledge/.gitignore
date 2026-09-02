@@ -1,0 +1,4 @@
+# macOS + editor cruft — never part of the knowledge
+.DS_Store
+**/.DS_Store
+.obsidian/workspace*.json

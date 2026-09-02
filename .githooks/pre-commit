@@ -1,0 +1,82 @@
+#!/bin/sh
+# pre-commit — KB vault health gate: kb-fix (auto) → kb-lint (gate) → kb-links (gate) → kb-sync --check (advisory).
+# Runs ONLY when _knowledge/*.md files are staged. Scripts live in _meta/.
+# Enabled via:  git config core.hooksPath .githooks   (one-time per clone — the init script does this automatically)
+# Bypass once:  git commit --no-verify
+
+ROOT="$(git rev-parse --show-toplevel)"
+[ -f "$ROOT/.githooks/kb.env" ] && . "$ROOT/.githooks/kb.env"   # optional per-repo env
+META="${KB_META:-$ROOT/_meta}"
+VAULT="${KB_VAULT:-$ROOT/_knowledge}"           # honor KB_VAULT (kb.env can set it); default _knowledge
+VREL="${VAULT#"$ROOT"/}"                          # repo-relative vault dir for staged-path matching
+STAGED="$(git diff --cached --name-only --diff-filter=ACM | grep -E "^${VREL}/.*\.md$")"
+
+# Code-path nudge: when important non-KB files change without a vault update, remind (never block).
+# Configure which paths trigger the nudge via KB_CODE_PATHS in .githooks/kb.env (space-separated).
+CODE_STAGED="$(git diff --cached --name-only --diff-filter=ACM)"
+CODE_PATHS="${KB_CODE_PATHS:-agents bootstrap.sh src}"
+CODE_HIT=""
+for _cp in $CODE_PATHS; do
+    if printf '%s\n' "$CODE_STAGED" | grep -q "^${_cp}"; then
+        CODE_HIT="${_cp}"
+        break
+    fi
+done
+
+if [ -z "$STAGED" ] && [ -n "$CODE_HIT" ]; then
+    echo "  ℹ️  KB nudge: '${CODE_HIT}' changed — consider a log.md entry if this reverses a documented decision."
+    exit 0
+fi
+[ -z "$STAGED" ] && exit 0   # nothing KB or notable in this commit → skip
+
+PY="$(command -v python3 || command -v python)"
+[ -z "$PY" ] && { echo "✗ KB pre-commit: python3 not found on PATH"; exit 1; }
+
+fail() {
+  echo ""
+  echo "✗ KB pre-commit: $1"
+  echo "  commit aborted — fix and re-commit (bypass once with: git commit --no-verify)"
+  exit 1
+}
+
+# 1. auto-fix Obsidian-breaking frontmatter, then re-stage ONLY the files this commit already staged
+FIXOUT="$("$PY" "$META/kb-fix.py" 2>&1)" || fail "kb-fix errored:
+$FIXOUT"
+if printf '%s' "$FIXOUT" | grep -q "fixed "; then
+  # Re-stage ONLY files kb-fix actually rewrote AND that were already staged — never blanket-add
+  # every staged file (that would sweep unrelated unstaged hunks of a `git add -p`'d file into the
+  # commit). kb-fix prints "  fixed  <rel>  (N value(s))"; pull <rel> from column 3.
+  FIXED="$(printf '%s\n' "$FIXOUT" | awk -F'  +' '/^  fixed  /{print $3}')"
+  printf '%s\n' "$FIXED" | while IFS= read -r f; do
+    [ -n "$f" ] && [ -f "$ROOT/$f" ] && printf '%s\n' "$STAGED" | grep -qxF "$f" && git add "$ROOT/$f"
+  done
+  echo "  kb-fix: quoted Obsidian-breaking frontmatter and re-staged the affected files"
+fi
+
+# 2. schema gate — block on any error. KB_SKIP_LINT=1 for vaults on a non-template frontmatter
+#    convention (kb-lint would be all noise); the links gate below still runs.
+if [ "${KB_SKIP_LINT:-0}" != "1" ]; then
+  if ! LINTOUT="$("$PY" "$META/kb-lint.py" 2>&1)"; then
+    printf '%s\n' "$LINTOUT" | grep '✗'
+    fail "schema errors (kb-lint)"
+  fi
+fi
+
+# 3. link-rot gate — block on broken internal links
+if ! LINKOUT="$("$PY" "$META/kb-links.py" 2>&1)"; then
+  printf '%s\n' "$LINKOUT" | grep '✗'
+  fail "broken internal links (kb-links)"
+fi
+
+# 4. advisory: warn (never block) when kb-sync --check reports drift or an orphaned platform file.
+#    Catches "edited a shard but forgot to re-run kb-sync", and a file left behind by a platform
+#    that was dropped from KB_PLATFORMS.
+if ! SYNCOUT="$("$PY" "$META/kb-sync.py" --check 2>&1)"; then
+  printf '%s\n' "$SYNCOUT" | grep -E '⚠|  '
+  # kb-sync names the right fix per item — re-run for a stale file, delete-or-re-enable for an
+  # orphan. Don't prescribe one here: "run kb-sync" never fixes an orphan.
+  echo "  ↳ advisory only — nothing was blocked; apply the fix named above, then re-stage."
+fi
+
+echo "✓ KB pre-commit: vault clean (fix · lint · links)"
+exit 0

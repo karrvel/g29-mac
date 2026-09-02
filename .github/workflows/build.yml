@@ -1,0 +1,50 @@
+name: build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: build on macOS
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install SDL2 headers (needed by the shim)
+        run: brew install sdl2
+
+      - name: Build ffb-probe
+        run: |
+          clang -O2 -Wall -o ffb-probe ffb-probe.c \
+            -framework IOKit -framework ForceFeedback -framework CoreFoundation \
+            -Wno-deprecated-declarations
+
+      - name: Build lgwheel
+        run: clang -O2 -Wall -o lgwheel lgwheel.c -framework IOKit -framework CoreFoundation
+
+      - name: Build the SDL2 FFB shim (x86_64, for Wine under Rosetta)
+        run: |
+          clang -arch x86_64 -O2 -Wall -dynamiclib -o libSDL2-2.0.0.dylib sdl2-lg4ff-shim.c \
+            -I"$(brew --prefix)/include" \
+            -framework IOKit -framework CoreFoundation \
+            -install_name @rpath/libSDL2-2.0.0.dylib -Wno-deprecated-declarations
+
+      - name: Verify the shim exports the full SDL surface Wine dlsyms
+        run: |
+          count=$(nm -gU libSDL2-2.0.0.dylib | grep -c " T _SDL_")
+          echo "exported SDL symbols: $count"
+          test "$count" -eq 52
+
+      - name: Probe runs (no wheel attached on CI — exit 2 is expected)
+        run: ./ffb-probe || test $? -eq 2
+
+  shellcheck:
+    name: shellcheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update && sudo apt-get install -y shellcheck
+      - run: shellcheck -S warning *.sh || true

@@ -1,0 +1,83 @@
+# Obsidian Bases view over this vault (the "structured view layer without a DB" — see
+# ../research/plain-markdown-vs-vector-rag.md). Open in Obsidian 1.7+ with the Bases core plugin.
+# Views filter on the default `type` enum. If you set KB_TYPES, edit the `value:` lines below to match.
+views:
+  - type: table
+    name: All Knowledge
+    order:
+      - file.name
+      - type
+      - title
+      - area
+      - status
+      - volatility
+      - updated
+      - tags
+    sort: []
+    columns:
+      - property: type
+      - property: title
+      - property: area
+      - property: status
+      - property: volatility
+      - property: updated
+  - type: table
+    name: Gotchas
+    filter:
+      - type: is
+        property: type
+        valueType: text
+        value: gotcha
+    columns:
+      - property: title
+      - property: area
+      - property: volatility
+      - property: updated
+  - type: table
+    name: Decisions
+    filter:
+      - type: is
+        property: type
+        valueType: text
+        value: decision
+    columns:
+      - property: title
+      - property: area
+      - property: status
+      - property: updated
+  - type: table
+    name: Security
+    filter:
+      - type: is
+        property: type
+        valueType: text
+        value: security
+    columns:
+      - property: title
+      - property: area
+      - property: status
+      - property: updated
+  - type: table
+    name: Tasks
+    filter:
+      - type: is
+        property: type
+        valueType: text
+        value: task
+    columns:
+      - property: title
+      - property: area
+      - property: status
+      - property: updated
+  - type: table
+    name: Repos
+    filter:
+      - type: is
+        property: type
+        valueType: text
+        value: repo
+    columns:
+      - property: title
+      - property: area
+      - property: status
+      - property: tags
