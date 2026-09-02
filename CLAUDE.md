@@ -49,9 +49,10 @@ _none open_
 ## Maintenance loop (after editing shards)
 
 ```bash
-python3 _meta/kb-sync.py && python3 _meta/kb-fix.py \
-  && python3 _meta/kb-lint.py && python3 _meta/kb-links.py && python3 _meta/kb-staleness.py
+./kb-sync.sh
 ```
+
+Use the wrapper, not `kb-sync.py` directly: it runs the whole loop *and* scrubs the absolute home path that kb-sync bakes into `INDEX.md`. This repo is public, so that path is a PII leak — the wrapper is what keeps it from coming back on every sync.
 
 Append events to `_knowledge/log.md`. Keep the always-loaded core tiny. Write generated markdown **un-hard-wrapped** — single-line paragraphs, so Obsidian doesn't render broken line breaks.
 
