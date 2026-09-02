@@ -11,7 +11,7 @@ jobs:
     name: build on macOS
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Install SDL2 headers (needed by the shim)
         run: brew install sdl2
@@ -45,6 +45,6 @@ jobs:
     name: shellcheck
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - run: sudo apt-get update && sudo apt-get install -y shellcheck
       - run: shellcheck -S warning *.sh || true

@@ -1,5 +1,9 @@
 # g29-mac
 
+[![build](https://github.com/karrvel/g29-mac/actions/workflows/build.yml/badge.svg)](https://github.com/karrvel/g29-mac/actions/workflows/build.yml)
+[![licence: MIT](https://img.shields.io/badge/licence-MIT-blue.svg)](LICENSE)
+[![platform: macOS arm64](https://img.shields.io/badge/platform-macOS%20arm64-lightgrey.svg)](#requirements)
+
 **Force feedback for Logitech racing wheels on Apple Silicon macOS — including inside Windows sims running under Wine.**
 
 macOS ships no driver for Logitech's wheels, and every standard force-feedback API refuses them. This repo contains three small C programs that work around that: a diagnostic, a userspace driver, and a drop-in `libSDL2` replacement that makes Wine expose a real DirectInput force-feedback device to Windows games.
