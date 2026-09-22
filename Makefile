@@ -48,8 +48,8 @@ $(SHIM): $(SRC)/sdl2-lg4ff-shim.c | $(BIN)
 		-I$(SDL_INC) $(FW_COMMON) \
 		-install_name @rpath/libSDL2-2.0.0.dylib $(QUIET_DEPRECATION)
 	@n=$$(nm -gU $@ | grep -c " T _SDL_"); \
-	  if [ "$$n" -ne 52 ]; then \
-	    echo "ERROR: shim exports $$n SDL symbols, expected 52 — Wine dlsyms all of them"; \
+	  if [ "$$n" -ne 55 ]; then \
+	    echo "ERROR: shim exports $$n SDL symbols, expected 55 — Wine dlsyms all of them"; \
 	    exit 1; \
 	  else echo "  shim exports $$n SDL symbols ✓"; fi
 

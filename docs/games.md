@@ -154,12 +154,16 @@ scripts/install-raceroom.sh install    # queues app 211500
 scripts/install-raceroom.sh play
 ```
 
-**Status here: staged, not finished.** The Windows Steam client is installed in the bottle and reaches the login screen with `steamwebhelper` running, but RaceRoom itself has not been installed and force feedback has not been confirmed end to end on it. The acceptance test is that `drive_c/Program Files (x86)/Steam/steamapps/common/raceroom racing experience` exists, the game launches, and a `LG4FF_SHIM_DEBUG=1` run logs `new effect … type 0x1` — the same constant-force signature Live for Speed and Speed Dreams produce. See [`../_knowledge/tasks/raceroom-needs-steam-login.md`](../_knowledge/tasks/raceroom-needs-steam-login.md).
+**Status here: blocked, and not on the password.** The Windows Steam client is installed in the bottle, but its UI never draws: `steamwebhelper.exe` — a full Chrome 126 — dies during startup and Steam relaunches it every ten seconds, which is the "not responding" dialog people report. There is no login screen to log in to, so the commands above stop at the first one. Whisky ships wine-7.7 and no Steam launch option changes the outcome; the diagnosis and the two routes out (a newer Wine, or doing without RaceRoom) are in [`../_knowledge/gotchas/steam-webhelper-restart-loop-in-wine.md`](../_knowledge/gotchas/steam-webhelper-restart-loop-in-wine.md) and [`../_knowledge/tasks/raceroom-needs-steam-login.md`](../_knowledge/tasks/raceroom-needs-steam-login.md).
 
-Two things to expect on the way there:
+An earlier version of this page said the client "reaches the login screen with `steamwebhelper` running". It does not, and it never did — the restart loop was in those logs and was misread.
 
-- Steam may fail with **"Steam needs to be online to update"** while the host's network is fine. The cause is Wine's WinHTTP running WPAD proxy auto-detection across every network interface — 26 of them on the machine this was diagnosed on — until Steam's updater times out. The registry fix, and the reason quitting your VPN clients helps, are in [`../_knowledge/gotchas/wine-winhttp-wpad-stalls-steam.md`](../_knowledge/gotchas/wine-winhttp-wpad-stalls-steam.md). Even after the fix, the first manifest attempt in a run may still log `http error 0` and only the retry succeeds, so give it a few minutes before quitting.
-- Steam's helper processes survive a polite shutdown and wedge the shared `wineserver`. Run `scripts/reset-bottle.sh` before launching another game.
+If that gets solved, the acceptance test is unchanged: `drive_c/Program Files (x86)/Steam/steamapps/common/raceroom racing experience` exists, the game launches, and a `LG4FF_SHIM_DEBUG=1` run logs `new effect … type 0x1` — the same constant-force signature Live for Speed and Speed Dreams produce. Nothing about the wheel or the shim is implicated here; this is Steam's problem alone.
+
+Two more things you will see on the way there:
+
+- Steam may fail with **"Steam needs to be online to update"** while the host's network is fine, or simply hang about two minutes on the update check at every launch before shrugging and continuing. The cause is Wine's WinHTTP running WPAD proxy auto-detection across every network interface — 26 of them on the machine this was diagnosed on — until Steam's updater times out. The registry fix, and the reason quitting your VPN clients helps, are in [`../_knowledge/gotchas/wine-winhttp-wpad-stalls-steam.md`](../_knowledge/gotchas/wine-winhttp-wpad-stalls-steam.md). It is slowness, not the blocker.
+- Steam's helper processes survive a polite shutdown and wedge the shared `wineserver` — a restart loop left running is dozens of them. Run `scripts/reset-bottle.sh` before launching another game.
 
 ## If force feedback is missing in a game
 

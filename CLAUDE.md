@@ -43,8 +43,9 @@ _none open_
 
 ### 🟠 LIVE — open work
 <!-- BEGIN:sync:open-work -->
-- [[raceroom-needs-steam-login]] — RaceRoom is staged but not installed — the Windows Steam client in the bottle needs a one-time interactive login
+- [[raceroom-needs-steam-login]] — RaceRoom is installed under Wine 11 — the only thing left is rebuilding the FFB shim against that Wine’s SDL2
 - [[shim-scoping-and-periodic-effects]] — Shim follow-ups — oscillate periodic effects instead of holding peak, and optionally scope the library override to one bottle
+- [[wire-up-virtualhere-bridge]] — Wire up VirtualHere + Steam Remote Play end to end — G29 on the Mac, real FFB proven on the LAN Windows x64 PC
 <!-- END:sync:open-work -->
 
 **How the LIVE blocks above are filled** (non-obvious, and it decides whether a finding you file is ever seen): `open-work` lists every `tasks/` shard with `status: active`. `live-security` lists a `security/` shard only when it is **both** `status: active` **and** `volatility: decays-with-code`. A `durable` security shard is treated as a standing rule, not an open finding, and deliberately does not appear — which is why the count reads 0 while `security/` holds a shard. File a genuine open finding as `decays-with-code` or it will stay invisible here.

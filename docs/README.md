@@ -7,7 +7,8 @@ Task-oriented guides. For *why* something is the way it is — the measurements,
 | [Installation and setup](installation.md) | Starting from a fresh clone, or setting up a new machine. |
 | [Troubleshooting](troubleshooting.md) | Something does not work. Indexed by symptom. |
 | [How it works](how-it-works.md) | You want to understand or extend the design. |
-| [Running sims](games.md) | Getting an actual game working with the wheel. |
+| [Running sims](games.md) | Getting an actual game working with the wheel, via Wine/Whisky on this Mac. |
+| [Windows PC bridge](windows-pc-bridge.md) | No Wine on this Mac, or you'd rather run the sim natively on a LAN Windows PC and stream it back. |
 
 ## The short version
 

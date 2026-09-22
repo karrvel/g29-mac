@@ -172,6 +172,9 @@ static SDL_JoystickType (*r_JoystickGetType)(SDL_Joystick *);
 static SDL_Haptic *(*r_HapticOpenFromJoystick)(SDL_Joystick *);
 static void   (*r_HapticClose)(SDL_Haptic *);
 static unsigned int (*r_HapticQuery)(SDL_Haptic *);
+static int (*r_HapticNumAxes)(SDL_Haptic *);
+static const char *(*r_JoystickGetSerial)(SDL_Joystick *);
+static int (*r_HapticSetAutocenter)(SDL_Haptic *, int);
 static int (*r_HapticNewEffect)(SDL_Haptic *, SDL_HapticEffect *);
 static int (*r_HapticUpdateEffect)(SDL_Haptic *, int, SDL_HapticEffect *);
 static int (*r_HapticRunEffect)(SDL_Haptic *, int, Uint32);
@@ -201,6 +204,9 @@ static void shim_init(void) {
     r_HapticOpenFromJoystick = real_sym("SDL_HapticOpenFromJoystick");
     r_HapticClose            = real_sym("SDL_HapticClose");
     r_HapticQuery            = real_sym("SDL_HapticQuery");
+    r_HapticNumAxes          = real_sym("SDL_HapticNumAxes");
+    r_JoystickGetSerial      = real_sym("SDL_JoystickGetSerial");
+    r_HapticSetAutocenter    = real_sym("SDL_HapticSetAutocenter");
     r_HapticNewEffect        = real_sym("SDL_HapticNewEffect");
     r_HapticUpdateEffect     = real_sym("SDL_HapticUpdateEffect");
     r_HapticRunEffect        = real_sym("SDL_HapticRunEffect");
@@ -463,6 +469,36 @@ SDL_Haptic *SDL_HapticOpenFromJoystick(SDL_Joystick *j) {
 void SDL_HapticClose(SDL_Haptic *h) {
     if (is_ours(h)) { wheel_stop_slot0(); wheel_autocentre(0); return; }
     if (r_HapticClose) r_HapticClose(h);
+}
+
+/* Wine 11's winebus resolves these two; Wine 7.7 did not. Missing symbols become NULL
+   and are called anyway, which is a null-deref crash in the game process. Our haptic
+   handles are ours, so they must never be forwarded to the real SDL2. */
+const char *SDL_JoystickGetSerial(SDL_Joystick *j) {
+    const char *s = r_JoystickGetSerial ? r_JoystickGetSerial(j) : NULL;
+    /* The G29 exposes no serial, so real SDL2 returns NULL here. Handing NULL onward
+       has callers dereferencing it, so give them a stable empty-but-valid string. */
+    if (!s) { shim_log("SDL_JoystickGetSerial -> NULL, substituting \"\""); return ""; }
+    return s;
+}
+
+int SDL_HapticNumAxes(SDL_Haptic *h) {
+    if (is_ours(h)) {
+        shim_log("SDL_HapticNumAxes -> 1");
+        return 1;   /* the wheel has one force axis: steering */
+    }
+    return r_HapticNumAxes ? r_HapticNumAxes(h) : 0;
+}
+
+int SDL_HapticSetAutocenter(SDL_Haptic *h, int autocenter) {
+    if (is_ours(h)) {
+        /* lg4ff has its own autocenter command; games that use force feedback set this
+           to 0 to take over centring themselves, which is the case we care about. */
+        shim_log("SDL_HapticSetAutocenter(%d) -> accepted", autocenter);
+        (void)autocenter;
+        return 0;
+    }
+    return r_HapticSetAutocenter ? r_HapticSetAutocenter(h, autocenter) : 0;
 }
 
 unsigned int SDL_HapticQuery(SDL_Haptic *h) {

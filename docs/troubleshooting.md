@@ -25,6 +25,7 @@ Where a fault has a full write-up, this page links to it rather than repeating i
 - [wineserver crashed, please enable coredumps](#wineserver-crashed-please-enable-coredumps)
 - [The game lags or stutters](#the-game-lags-or-stutters)
 - [Steam in the bottle says it needs to be online to update](#steam-in-the-bottle-says-it-needs-to-be-online-to-update)
+- [Steam opens but nothing is drawn, and it says a component stopped responding](#steam-opens-but-nothing-is-drawn-and-it-says-a-component-stopped-responding)
 
 **Building**
 
@@ -209,6 +210,28 @@ The Windows Steam client in the bottle fails with `Steam needs to be online to u
 **Fix.** Disable proxy auto-detection in the bottle. The registry commands are in [../_knowledge/gotchas/wine-winhttp-wpad-stalls-steam.md](../_knowledge/gotchas/wine-winhttp-wpad-stalls-steam.md).
 
 Two things to expect afterwards, or you will think it failed again: it is faster but not instant, and the first manifest attempt in a run may still log `http error 0` with only the retry succeeding — give it a few minutes rather than quitting at the first error. Quitting VPN clients removes most of the tunnel adapters and speeds it up considerably.
+
+This one is cosmetic. It costs about two minutes at every launch and Steam then carries on regardless; it is not what stops Steam working, and the next entry is.
+
+## Steam opens but nothing is drawn, and it says a component stopped responding
+
+A Steam process appears, no UI ever paints, and Steam offers its own "not responding / restart Steam" dialog. Confirm it from the log rather than the screen — `drive_c/Program Files (x86)/Steam/logs/webhelper.txt` shows a fresh `Startup - webhelper launched pid: …` line **every ten seconds** with `-startcount=` climbing without bound:
+
+```bash
+source scripts/common.sh
+grep -a "Startup - webhelper launched" \
+  "$WINEPREFIX/drive_c/Program Files (x86)/Steam/logs/webhelper.txt" | tail -5
+```
+
+**What it means.** Steam.exe is fine. The UI is drawn by `bin/cef/cef.win64/steamwebhelper.exe`, a full Chrome 126, and that child dies during startup while Steam's watchdog restarts it forever. Under a `WINEDEBUG=err+all` capture the first failure is CEF's crash handler refusing Steam's own single-dash flags (`invalid option -- \`-n'` → `crash server failed to launch, self-terminating`); remove CEF's `crash_reporter.cfg` and that stops, but the process then dies a moment later on `Unhandled exception 0x80000003` inside libcef instead.
+
+**Fix.** There isn't one at this Wine version, and it is worth knowing that before spending an evening on launch options: the complete set Steam accepts was read out of the binaries and none of it disables crash reporting or changes the outcome. Whisky ships wine-7.7 against a 2026 Steam client. The routes that exist are a newer Wine or doing without Steam — the full diagnosis, including what was ruled out (DXVK, the CEF profile cache) and the one thing the launch options cannot reach (Steam's own GPU fallback), is in [../_knowledge/gotchas/steam-webhelper-restart-loop-in-wine.md](../_knowledge/gotchas/steam-webhelper-restart-loop-in-wine.md). Only RaceRoom is affected; Live for Speed and Speed Dreams never touch Steam.
+
+If a loop has been running for a while, stop it before launching anything else — those CEF helpers survive their window and share the bottle's one `wineserver`:
+
+```bash
+scripts/reset-bottle.sh
+```
 
 ---
 
